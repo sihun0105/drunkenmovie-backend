@@ -1,6 +1,6 @@
 spring:
-  profiles:
-    active: ${spring.profiles.active}
+  application:
+    name: drunkenmovie-backend
 
 server:
   port: 8080
