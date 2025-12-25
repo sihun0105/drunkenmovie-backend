@@ -1,6 +1,3 @@
-spring:
-  application:
-    name: drunkenmovie-backend
-
 server:
   port: 8080
+
