@@ -2,15 +2,18 @@ package com.example.drunkenmoviebackend.repository;
 
 import com.example.drunkenmoviebackend.domain.Member;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepository {
     Member save(Member member);
 
+    Optional<Member> findByNickname(String name);
+
+    Optional<Member> findByEmail(String email);
+
+    Optional<Member> findByIdAndDeletedAtIsNull(Long id);
+
     Optional<Member> findById(Long id);
 
-    Optional<Member> findByName(String name);
-
-    List<Member> findAll();
+    boolean existsByNicknameAndIdNot(String nickname, Long id);
 }

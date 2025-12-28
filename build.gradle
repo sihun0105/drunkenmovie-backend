@@ -28,12 +28,15 @@ dependencies {
 
     // env
     implementation 'me.paulschwarz:spring-dotenv:4.0.0'
-
+    testImplementation "io.github.cdimascio:dotenv-java:3.0.0"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // spring-security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'

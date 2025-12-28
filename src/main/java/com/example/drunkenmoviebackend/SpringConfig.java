@@ -1,24 +1,32 @@
 package com.example.drunkenmoviebackend;
 
-import com.example.drunkenmoviebackend.repository.JPAMemberRepository;
-import com.example.drunkenmoviebackend.repository.MemberRepository;
-import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.drunkenmoviebackend.aop.TimeTraceAop;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class SpringConfig {
 
-    private final EntityManager em;
-
-    @Autowired
-    public SpringConfig(EntityManager em) {
-        this.em = em;
+    @Bean
+    public TimeTraceAop timeTraceAop() {
+        return new TimeTraceAop();
     }
 
     @Bean
-    public MemberRepository memberRepository() {
-        return new JPAMemberRepository(em);
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
+//    private final EntityManager em;
+//
+//    @Autowired
+//    public SpringConfig(EntityManager em) {
+//        this.em = em;
+//    }
+//
+//    @Bean
+//    public MemberRepository memberRepository() {
+//        return new JPAMemberRepository(em);
+//    }
 }

@@ -2,8 +2,13 @@ package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Gender;
 import com.example.drunkenmoviebackend.domain.Member;
+import com.example.drunkenmoviebackend.dto.CreateUserDto;
+import com.example.drunkenmoviebackend.dto.UpdateUserDto;
+import com.example.drunkenmoviebackend.dto.UpdateUserProfileImageDto;
 import com.example.drunkenmoviebackend.repository.MemberRepository;
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,31 +16,109 @@ import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
 @SpringBootTest
 @ActiveProfiles("local")
 @Transactional
-public class MemberServiceTest {
+class MemberServiceTest {
+
+    @Autowired
+    MemberService memberService;
 
     @Autowired
     MemberRepository memberRepository;
-    @Autowired
-    private MemberService memberService;
+
+
+    @BeforeAll
+    static void loadEnv() {
+        Dotenv dotenv = Dotenv.configure()
+                .ignoreIfMissing()
+                .load();
+
+        dotenv.entries().forEach(e ->
+                System.setProperty(e.getKey(), e.getValue())
+        );
+    }
+
+    /**
+     * 회원 생성 헬퍼
+     */
+    private Member createMember(String email, String nickname) {
+        CreateUserDto dto = new CreateUserDto();
+        dto.setEmail(email);
+        dto.setPassword("password123");
+        dto.setNickname(nickname);
+        dto.setMarketingAgreed(false);
+        dto.setGender(Gender.male);
+
+        return memberService.join(dto);
+    }
 
     @Test
-    void join() {
-
+    void 회원가입_성공() {
         // given
-        Member member = new Member();
-        member.setEmail(Math.random() + "@test.com");
-        member.setGender(Gender.male);
-        member.setNickname("TestUser");
+        CreateUserDto dto = new CreateUserDto();
+        dto.setEmail("test1@test.com");
+        dto.setPassword("password123");
+        dto.setNickname("testUser1");
+        dto.setMarketingAgreed(true);
+        dto.setGender(Gender.male);
 
         // when
-        Long result = memberService.join(member);
+        Member saved = memberService.join(dto);
 
         // then
-        Member foundMember = memberRepository.findById(result).get();
-        assertThat(foundMember.getId()).isEqualTo(member.getId());
+        Member found = memberRepository.findByIdAndDeletedAtIsNull(saved.getId()).orElseThrow();
+        assertThat(found.getEmail()).isEqualTo(dto.getEmail());
+        assertThat(found.getNickname()).isEqualTo(dto.getNickname());
+        assertThat(found.getGender()).isEqualTo(dto.getGender());
+        assertThat(found.getPassword()).isNotEqualTo(dto.getPassword()); // 암호화 검증
+    }
+
+    @Test
+    void 닉네임_수정_성공() {
+        // given
+        Member member = createMember("test2@test.com", "oldNick");
+
+        UpdateUserDto dto = new UpdateUserDto();
+        dto.setId(member.getId());
+        dto.setNickname("newNick");
+
+        // when
+        Member updated = memberService.updateUser(dto);
+
+        // then
+        assertThat(updated.getNickname()).isEqualTo("newNick");
+    }
+
+    @Test
+    void 프로필_이미지_수정_성공() {
+        // given
+        Member member = createMember("test3@test.com", "profileUser");
+
+        UpdateUserProfileImageDto dto = new UpdateUserProfileImageDto();
+        dto.setId(member.getId());
+        dto.setImage("https://image.test/profile.png");
+
+        // when
+        Member updated = memberService.updateUserProfileImage(dto);
+
+        // then
+        assertThat(updated.getImage()).isEqualTo(dto.getImage());
+    }
+
+    @Test
+    void 회원_soft_delete() {
+
+        // given
+        Member member = createMember("test3@test.com", "profileUser");
+
+        Member saved = memberRepository.save(member);
+
+        // when
+        Member deletedMember = memberService.remove(saved.getId());
+
+        // then
+        Member deleted = memberRepository.findById(member.getId()).orElseThrow();
+        assertThat(deleted.getDeletedAt()).isNotNull();
     }
 }
