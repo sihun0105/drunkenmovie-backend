@@ -12,3 +12,9 @@ spring:
     properties:
       hibernate:
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+  jwt:
+    access-secret: ${JWT_ACCESS_SECRET}
+    access-expire: ${JWT_ACCESS_EXPIRE}
+    refresh-secret: ${JWT_REFRESH_SECRET}
+    refresh-expire: ${JWT_REFRESH_EXPIRE}
