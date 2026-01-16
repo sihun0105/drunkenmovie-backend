@@ -1,11 +1,11 @@
 package com.example.drunkenmoviebackend.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
 
-@Getter
-@Setter
-public class UpdateUserDto {
+@Data
+@Builder
+public class UpdateMemberResponse {
     private Long id;
     private String email;
     private String nickname;

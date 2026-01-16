@@ -2,9 +2,9 @@ package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Gender;
 import com.example.drunkenmoviebackend.domain.Member;
-import com.example.drunkenmoviebackend.dto.CreateUserDto;
-import com.example.drunkenmoviebackend.dto.UpdateUserDto;
-import com.example.drunkenmoviebackend.dto.UpdateUserProfileImageDto;
+import com.example.drunkenmoviebackend.dto.CreateMemberRequest;
+import com.example.drunkenmoviebackend.dto.UpdateMemberRequest;
+import com.example.drunkenmoviebackend.dto.UpdateUserProfileImageRequest;
 import com.example.drunkenmoviebackend.repository.MemberRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.transaction.Transactional;
@@ -43,7 +43,7 @@ class MemberServiceTest {
      * 회원 생성 헬퍼
      */
     private Member createMember(String email, String nickname) {
-        CreateUserDto dto = new CreateUserDto();
+        CreateMemberRequest dto = new CreateMemberRequest();
         dto.setEmail(email);
         dto.setPassword("password123");
         dto.setNickname(nickname);
@@ -56,7 +56,7 @@ class MemberServiceTest {
     @Test
     void 회원가입_성공() {
         // given
-        CreateUserDto dto = new CreateUserDto();
+        CreateMemberRequest dto = new CreateMemberRequest();
         dto.setEmail("test1@test.com");
         dto.setPassword("password123");
         dto.setNickname("testUser1");
@@ -79,7 +79,7 @@ class MemberServiceTest {
         // given
         Member member = createMember("test2@test.com", "oldNick");
 
-        UpdateUserDto dto = new UpdateUserDto();
+        UpdateMemberRequest dto = new UpdateMemberRequest();
         dto.setId(member.getId());
         dto.setNickname("newNick");
 
@@ -95,7 +95,7 @@ class MemberServiceTest {
         // given
         Member member = createMember("test3@test.com", "profileUser");
 
-        UpdateUserProfileImageDto dto = new UpdateUserProfileImageDto();
+        UpdateUserProfileImageRequest dto = new UpdateUserProfileImageRequest();
         dto.setId(member.getId());
         dto.setImage("https://image.test/profile.png");
 

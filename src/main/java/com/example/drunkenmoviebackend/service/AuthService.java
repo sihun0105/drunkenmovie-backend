@@ -47,20 +47,17 @@ public class AuthService {
     }
 
     @Transactional
-    public LoginResponse oauthLogin(OauthLoginDto dto) {
-        Member member = memberRepository.findByEmailAndDeletedAtIsNull(dto.getProviderId())
+    public Member oauthLogin(OauthLoginDto dto) {
+        return memberRepository.findByEmailAndDeletedAtIsNull(dto.getProviderId())
                 .orElseGet(() -> {
                     String randomNickname = UUID.randomUUID().toString().substring(0, 8);
                     String hashedPassword = passwordEncoder.encode("moview" + dto.getProviderId());
-
                     Member newMember = new Member();
                     newMember.setEmail(dto.getProviderId());
                     newMember.setPassword(hashedPassword);
                     newMember.setNickname("user_" + randomNickname);
                     return memberRepository.save(newMember);
                 });
-
-        return LoginResponse.from(member);
     }
 
     public ValidationEmailResponse validateEmail(String email) {

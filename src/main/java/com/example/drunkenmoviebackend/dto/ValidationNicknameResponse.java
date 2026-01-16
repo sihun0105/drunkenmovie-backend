@@ -1,13 +1,20 @@
 package com.example.drunkenmoviebackend.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-@AllArgsConstructor
+@Setter
+@Builder
 public class ValidationNicknameResponse {
     private boolean isAvailable;
     private String message;
+
+    public ValidationNicknameResponse(boolean isAvailable, String message) {
+        this.isAvailable = isAvailable;
+        this.message = message;
+    }
 
     public static ValidationNicknameResponse available(String msg) {
         return new ValidationNicknameResponse(true, msg);

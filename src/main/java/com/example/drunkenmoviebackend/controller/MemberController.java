@@ -19,38 +19,77 @@ public class MemberController {
     }
 
     @PostMapping("/members/new")
-    public Member create(@RequestBody @Valid CreateUserDto dto) {
-        return memberService.join(dto);
+    public CreateMemberResponse create(@RequestBody @Valid CreateMemberRequest dto) {
+        Member member = memberService.join(dto);
+        return CreateMemberResponse.builder()
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .marketingAgreed(member.getMarketingAgreed())
+                .gender(member.getGender())
+                .build();
     }
 
     @PatchMapping("/members/update")
-    public Member update(@RequestBody @Valid UpdateUserDto dto) {
-        return memberService.updateUser(dto);
+    public UpdateMemberResponse update(@RequestBody @Valid UpdateMemberRequest dto) {
+        Member member = memberService.updateUser(dto);
+        return UpdateMemberResponse.builder()
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .id(member.getId())
+                .image(member.getImage())
+                .build();
     }
 
     @DeleteMapping("/members/delete")
-    public Member delete(@RequestBody @Valid RemoveUserDto dto) {
-        return memberService.remove(dto.getId());
+    public DeleteMemberResponse delete(@RequestBody @Valid DeleteMemberResponse dto) {
+        Member member = memberService.remove(dto.getId());
+        return DeleteMemberResponse.builder()
+                .id(member.getId())
+                .build();
     }
 
     @PostMapping("/members/profile-image")
-    public Member updateProfileImage(@RequestBody @Valid UpdateUserProfileImageDto dto) {
-        return memberService.updateUserProfileImage(dto);
+    public UpdateMemberResponse updateProfileImage(@RequestBody @Valid UpdateUserProfileImageRequest dto) {
+        Member member = memberService.updateUserProfileImage(dto);
+        return UpdateMemberResponse.builder()
+                .id(member.getId())
+                .image(member.getImage())
+                .build();
     }
 
-    //TODO: 로그인 리스폰스는 Omit<User, 'password'>
     @PostMapping("/members/login")
-    public TokenResponse login(@RequestBody @Valid LoginUserDto dto) {
-        System.out.println(dto);
-        Member member = new Member();
-        member.setEmail(dto.getEmail());
-        member.setPassword(dto.getPassword());
-        return authService.login(member);
+    public MemberLoginResponse login(@RequestBody @Valid LoginUserDto dto) {
+        Member member = memberService.login(dto.getEmail(), dto.getPassword());
+        return MemberLoginResponse.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .createdAt(member.getCreatedAt())
+                .updatedAt(member.getUpdatedAt())
+                .deletedAt((member.getDeletedAt()))
+                .provider(member.getProvider())
+                .marketingAgreed(member.getMarketingAgreed())
+                .gender(member.getGender())
+                .image(member.getImage())
+                .build();
     }
 
     @PostMapping("/members/oauth-login")
-    public LoginResponse oauthLogin(@RequestBody @Valid OauthLoginDto dto) {
-        return authService.oauthLogin(dto);
+    public MemberLoginResponse oauthLogin(@RequestBody @Valid OauthLoginDto dto) {
+
+        Member member = authService.oauthLogin(dto);
+        return MemberLoginResponse.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .nickname(member.getNickname())
+                .createdAt(member.getCreatedAt())
+                .updatedAt(member.getUpdatedAt())
+                .deletedAt((member.getDeletedAt()))
+                .provider(member.getProvider())
+                .marketingAgreed(member.getMarketingAgreed())
+                .gender(member.getGender())
+                .image(member.getImage())
+                .build();
     }
 
     @PostMapping("/members/validate-nickname")

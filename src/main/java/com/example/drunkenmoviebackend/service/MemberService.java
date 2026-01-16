@@ -1,9 +1,9 @@
 package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Member;
-import com.example.drunkenmoviebackend.dto.CreateUserDto;
-import com.example.drunkenmoviebackend.dto.UpdateUserDto;
-import com.example.drunkenmoviebackend.dto.UpdateUserProfileImageDto;
+import com.example.drunkenmoviebackend.dto.CreateMemberRequest;
+import com.example.drunkenmoviebackend.dto.UpdateMemberRequest;
+import com.example.drunkenmoviebackend.dto.UpdateUserProfileImageRequest;
 import com.example.drunkenmoviebackend.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +27,23 @@ public class MemberService {
 
     }
 
-    /* ================= 회원 가입 ================= */
+    /* ================= 회원 로그인 ================= */
+    public Member login(String email, String password) {
 
-    public Member join(CreateUserDto dto) {
+        Member member = memberRepository.findByEmailAndDeletedAtIsNull(email)
+                .orElseThrow(() ->
+                        new IllegalStateException("존재하지 않는 회원입니다. email=" + email)
+                );
+
+        if (!passwordEncoder.matches(password, member.getPassword())) {
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다.");
+        }
+
+        return member;
+    }
+
+    /* ================= 회원 가입 ================= */
+    public Member join(CreateMemberRequest dto) {
 
         if (memberRepository.findByNickname(dto.getNickname()).isPresent()) {
             throw new IllegalStateException("이미 존재하는 닉네임입니다.");
@@ -68,7 +82,7 @@ public class MemberService {
 
     /* ================= 회원 정보 수정 ================= */
 
-    public Member updateUser(UpdateUserDto dto) {
+    public Member updateUser(UpdateMemberRequest dto) {
 
         Member member = memberRepository.findByIdAndDeletedAtIsNull(dto.getId())
                 .orElseThrow(() ->
@@ -99,7 +113,7 @@ public class MemberService {
 
     /* ================= 프로필 이미지 수정 ================= */
 
-    public Member updateUserProfileImage(UpdateUserProfileImageDto dto) {
+    public Member updateUserProfileImage(UpdateUserProfileImageRequest dto) {
 
         Member member = memberRepository.findByIdAndDeletedAtIsNull(dto.getId())
                 .orElseThrow(() ->
