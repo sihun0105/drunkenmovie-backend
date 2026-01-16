@@ -1,4 +1,4 @@
-package com.example.drunkenmoviebackend.dto;
+package com.example.drunkenmoviebackend.dto.member;
 
 import lombok.Data;
 

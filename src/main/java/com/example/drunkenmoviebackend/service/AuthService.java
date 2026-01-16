@@ -1,7 +1,7 @@
 package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Member;
-import com.example.drunkenmoviebackend.dto.*;
+import com.example.drunkenmoviebackend.dto.member.*;
 import com.example.drunkenmoviebackend.global.provider.JwtProvider;
 import com.example.drunkenmoviebackend.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;

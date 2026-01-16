@@ -1,7 +1,7 @@
 package com.example.drunkenmoviebackend.controller;
 
 import com.example.drunkenmoviebackend.domain.Member;
-import com.example.drunkenmoviebackend.dto.*;
+import com.example.drunkenmoviebackend.dto.member.*;
 import com.example.drunkenmoviebackend.service.AuthService;
 import com.example.drunkenmoviebackend.service.MemberService;
 import jakarta.validation.Valid;

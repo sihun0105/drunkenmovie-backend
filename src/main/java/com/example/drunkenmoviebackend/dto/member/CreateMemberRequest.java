@@ -1,4 +1,4 @@
-package com.example.drunkenmoviebackend.dto;
+package com.example.drunkenmoviebackend.dto.member;
 
 import com.example.drunkenmoviebackend.domain.Gender;
 import jakarta.validation.constraints.Email;

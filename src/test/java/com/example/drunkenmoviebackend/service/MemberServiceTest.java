@@ -2,9 +2,9 @@ package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Gender;
 import com.example.drunkenmoviebackend.domain.Member;
-import com.example.drunkenmoviebackend.dto.CreateMemberRequest;
-import com.example.drunkenmoviebackend.dto.UpdateMemberRequest;
-import com.example.drunkenmoviebackend.dto.UpdateUserProfileImageRequest;
+import com.example.drunkenmoviebackend.dto.member.CreateMemberRequest;
+import com.example.drunkenmoviebackend.dto.member.UpdateMemberRequest;
+import com.example.drunkenmoviebackend.dto.member.UpdateUserProfileImageRequest;
 import com.example.drunkenmoviebackend.repository.MemberRepository;
 import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.transaction.Transactional;
