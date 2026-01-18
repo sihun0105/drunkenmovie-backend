@@ -14,40 +14,19 @@ public class Reply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(nullable = false)
-    private Long movieId;
+    private Integer movieId; // ✔ Movie.movieCd 와 동일
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userno")
+    private Member user;
 
     @Lob
     private String comment;
 
-    /**
-     * Comment.userno → User.id
-     * User 엔티티는 Member로 매핑되어 있음
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userno", nullable = false)
-    private Member user;
-
-    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(nullable = false)
     private LocalDateTime updatedAt;
-
     private LocalDateTime deletedAt;
-
-    /* ---------- JPA Lifecycle ---------- */
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
 }

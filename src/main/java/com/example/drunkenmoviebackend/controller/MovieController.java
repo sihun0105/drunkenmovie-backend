@@ -1,6 +1,8 @@
 package com.example.drunkenmoviebackend.controller;
 
-import com.example.drunkenmoviebackend.dto.MovieDto;
+import com.example.drunkenmoviebackend.dto.movie.MovieDetailResponse;
+import com.example.drunkenmoviebackend.dto.movie.MovieDto;
+import com.example.drunkenmoviebackend.dto.movie.MovieListResponse;
 import com.example.drunkenmoviebackend.service.MovieService;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,13 +17,14 @@ public class MovieController {
         this.movieService = movieService;
     }
 
-    @GetMapping()
-    public List<MovieDto> getMovieDatas() {
-
-
-        var movieDatas = movieService.getMovieDatas();
-        System.out.println(movieDatas.toArray().length);
-        return movieDatas;
+    @GetMapping("")
+    public MovieListResponse getMovieDatas() {
+        List<MovieDto> movies = movieService.getMovieDatas();
+        return MovieListResponse.builder()
+                .movies(movies)
+                .size(movies.size())
+                .hasNext(false)
+                .build();
     }
 
     @DeleteMapping("/{id}")
@@ -30,8 +33,7 @@ public class MovieController {
     }
 
     @GetMapping("/detail/{movieCd}")
-    public MovieDto getMovieDetail(@PathVariable Integer movieCd) {
-        // TODO: 서비스에서 상세조회 로직 구현
-        return null;
+    public MovieDetailResponse getMovieDetail(@PathVariable Integer movieCd) {
+        return movieService.getMovieDetail(movieCd);
     }
 }

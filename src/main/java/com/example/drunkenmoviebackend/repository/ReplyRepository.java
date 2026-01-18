@@ -23,6 +23,6 @@ public interface ReplyRepository extends JpaRepository<Reply, Long> {
             Pageable pageable
     );
 
-    long countByMovieIdAndDeletedAtIsNull(Long movieId);
+    long countByMovieIdAndDeletedAtIsNull(Integer movieId);
 }
 

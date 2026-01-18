@@ -2,59 +2,67 @@ package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Movie;
 import com.example.drunkenmoviebackend.domain.MovieScore;
-import com.example.drunkenmoviebackend.dto.MovieDto;
+import com.example.drunkenmoviebackend.dto.movie.MovieDetailResponse;
+import com.example.drunkenmoviebackend.dto.movie.MovieDto;
+import com.example.drunkenmoviebackend.dto.movie.MovieSummaryRow;
+import com.example.drunkenmoviebackend.dto.movie.MovieVodDto;
+import com.example.drunkenmoviebackend.repository.MovieQueryRepository;
 import com.example.drunkenmoviebackend.repository.MovieRepository;
+import com.example.drunkenmoviebackend.repository.ReplyRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MovieService {
     private final MovieRepository movieRepository;
-
-    public MovieService(MovieRepository movieRepository) {
-        this.movieRepository = movieRepository;
-    }
+    private final MovieQueryRepository movieQueryRepository;
+    private final ReplyRepository replyRepository;
 
     public List<MovieDto> getMovieDatas() {
-        // 날짜 조건 없이 랭크순 10개만 조회 (테스트/임시)
-        List<Movie> movies = movieRepository.findTop10ByOrderByRankAsc();
+        LocalDateTime now = LocalDateTime.now();
 
-        List<MovieDto> result = new java.util.ArrayList<>();
-        for (Movie movie : movies) {
-            int commentCount = 0;
-            // TODO: commentRepository.countByMovieIdAndDeletedAtIsNull(movie.getMovieCd()) 구현 필요
-            // int commentCount = commentRepository.countByMovieIdAndDeletedAtIsNull(movie.getMovieCd());
+        LocalDate targetDate =
+                (now.getHour() == 0 && now.getMinute() < 10)
+                        ? now.toLocalDate().minusDays(2) // 00:00~00:10 → 이틀 전
+                        : now.toLocalDate().minusDays(1); // 기본 → 하루 전
 
-            int scoreCount = 0;
-            float averageScore = 0;
-            if (movie.getMovieScores() != null && !movie.getMovieScores().isEmpty()) {
-                scoreCount = movie.getMovieScores().size();
-                averageScore = (float) movie.getMovieScores().stream().filter(s -> s.getScore() != null).mapToDouble(MovieScore::getScore).average().orElse(0);
-            }
-            MovieDto dto = new MovieDto();
-            dto.setId(movie.getId());
-            dto.setAudience(movie.getAudience());
-            dto.setMovieCd(movie.getMovieCd());
-            dto.setTitle(movie.getTitle());
-            dto.setRank(movie.getRank());
-            dto.setCreatedAt(movie.getCreatedAt());
-            dto.setUpdatedAt(movie.getUpdatedAt());
-            dto.setPoster(movie.getPoster());
-            dto.setPlot(movie.getPlot());
-            dto.setRankInten(movie.getRankInten());
-            dto.setRankOldAndNew(movie.getRankOldAndNew());
-            dto.setOpenDt(movie.getOpenDt());
-            dto.setGenre(movie.getGenre());
-            dto.setDirector(movie.getDirector());
-            dto.setRatting(movie.getRatting());
-            // dto.setVods(movie.getMovieVod()); // MovieVod 매핑 필요시
-            dto.setCommentCount(commentCount);
-            dto.setScoreCount(scoreCount);
-            dto.setAverageScore(averageScore);
-            result.add(dto);
-        }
-        return result;
+        List<MovieSummaryRow> rows =
+                movieQueryRepository.findMovieSummaries(targetDate, 10);
+
+        return rows.stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    private MovieDto toDto(MovieSummaryRow row) {
+        double avgScore =
+                row.averageScore() == null
+                        ? 0.0
+                        : Math.round(row.averageScore() * 10) / 10.0;
+        return MovieDto.builder()
+                .id(row.id())
+                .audience(row.audience())
+                .title(row.title())
+                .createdAt(row.createdAt())
+                .updatedAt(row.updatedAt())
+                .poster(row.poster())
+                .rank(row.rank())
+                .rankInten(row.rankInten())
+                .rankOldAndNew(row.rankOldAndNew())
+                .plot(row.plot())
+                .openedAt(LocalDate.from(row.openDt()))
+                .genre(row.genre())
+                .director(row.director())
+                .ratting(row.ratting())
+                .commentCount(row.commentCount())
+                .scoreCount(row.scoreCount())
+                .averageScore(avgScore)
+                .build();
     }
 
 
@@ -68,5 +76,57 @@ public class MovieService {
 
     public void deleteById(Integer id) {
         movieRepository.deleteById(id);
+    }
+
+    public MovieDetailResponse getMovieDetail(Integer movieCd) {
+
+        Movie movie = movieRepository.findDetailByMovieCd(movieCd)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Movie not found. movieCd=" + movieCd)
+                );
+
+        // 댓글 수 (soft delete 제외)
+        long commentCount =
+                replyRepository.countByMovieIdAndDeletedAtIsNull(movie.getMovieCd());
+
+        // 평점 계산
+        long scoreCount = movie.getMovieScores().size();
+
+        double averageScore =
+                scoreCount == 0
+                        ? 0.0
+                        : Math.round(
+                        movie.getMovieScores()
+                                .stream()
+                                .mapToDouble(MovieScore::getScore)
+                                .average()
+                                .orElse(0.0) * 10
+                ) / 10.0;
+
+        return MovieDetailResponse.builder()
+                .id(movie.getId())
+                .movieCd(movie.getMovieCd())
+                .title(movie.getTitle())
+                .audience(movie.getAudience())
+                .rank(movie.getRank())
+                .rankInten(movie.getRankInten())
+                .rankOldAndNew(movie.getRankOldAndNew())
+                .poster(movie.getPoster())
+                .plot(movie.getPlot())
+                .openedAt(LocalDate.from(movie.getOpenDt()))
+                .genre(movie.getGenre())
+                .director(movie.getDirector())
+                .ratting(movie.getRatting())
+                .createdAt(movie.getCreatedAt())
+                .updatedAt(movie.getUpdatedAt())
+                .vods(
+                        movie.getMovieVods().stream()
+                                .map(MovieVodDto::from)
+                                .toList()
+                )
+                .commentCount(commentCount)
+                .scoreCount(scoreCount)
+                .averageScore(averageScore)
+                .build();
     }
 }

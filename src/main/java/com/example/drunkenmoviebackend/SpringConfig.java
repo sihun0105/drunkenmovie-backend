@@ -2,6 +2,9 @@ package com.example.drunkenmoviebackend;
 
 import com.example.drunkenmoviebackend.aop.TimeTraceAop;
 import com.example.drunkenmoviebackend.global.provider.JwtProvider;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,9 @@ import java.time.Duration;
 @EnableWebSecurity
 public class SpringConfig {
 
+    @PersistenceContext
+    private EntityManager em;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -30,7 +36,10 @@ public class SpringConfig {
                                 "/members/new",
                                 "/members/oauth-login",
                                 "/members/validate-email",
-                                "/members/validate-nickname"
+                                "/members/validate-nickname",
+                                "/movie/**"
+
+
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -68,15 +77,9 @@ public class SpringConfig {
                 refreshExpire
         );
     }
-//    private final EntityManager em;
-//
-//    @Autowired
-//    public SpringConfig(EntityManager em) {
-//        this.em = em;
-//    }
-//
-//    @Bean
-//    public MemberRepository memberRepository() {
-//        return new JPAMemberRepository(em);
-//    }
+
+    @Bean
+    public JPAQueryFactory jpaQueryFactory() {
+        return new JPAQueryFactory(em);
+    }
 }
