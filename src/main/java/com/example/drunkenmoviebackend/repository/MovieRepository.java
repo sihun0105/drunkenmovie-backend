@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface MovieRepository extends JpaRepository<Movie, Integer> {
+public interface MovieRepository extends JpaRepository<Movie, Integer>, MovieRepositoryCustom {
     Movie findByMovieCd(Integer movieCd);
 
     List<Movie> findTop10ByUpdatedAtAfterOrderByRankAsc(LocalDateTime updatedAt);
