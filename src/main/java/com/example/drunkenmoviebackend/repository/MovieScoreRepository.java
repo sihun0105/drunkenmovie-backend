@@ -4,7 +4,10 @@ import com.example.drunkenmoviebackend.domain.MovieScore;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 public interface MovieScoreRepository extends JpaRepository<MovieScore, Long> {
 
@@ -32,6 +35,18 @@ public interface MovieScoreRepository extends JpaRepository<MovieScore, Long> {
             Long scoreCount,
             Double averageScore
     );
+
+    long countByMovieCd(Long movieCd);
+
+    @Query("""
+                select avg(ms.score)
+                from MovieScore ms
+                where ms.movieCd = :movieCd
+            """)
+    Double calculateAverageScoreByMovieCd(@Param("movieCd") Long movieCd);
+
+    Optional<MovieScore> findByMovieCdAndUserno(Long movieCd, Integer userno);
+
 
 }
 

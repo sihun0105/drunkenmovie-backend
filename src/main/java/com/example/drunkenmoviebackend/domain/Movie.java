@@ -18,7 +18,7 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private Integer movieCd;
 
     private String title;
@@ -45,6 +45,13 @@ public class Movie {
 
     private String ratting;
 
+    // 🔥 평점 통계 (JPQL update 대상)
+    @Column(nullable = false)
+    private Long scoreCount = 0L;
+
+    @Column(nullable = false)
+    private Double averageScore = 0.0;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -56,4 +63,15 @@ public class Movie {
     @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
     private List<MovieScore> movieScores = new ArrayList<>();
 
+    // 🔥 생성/수정 시간 자동 관리 (선택이지만 강력 추천)
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

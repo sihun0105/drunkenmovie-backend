@@ -1,6 +1,7 @@
 package com.example.drunkenmoviebackend.service;
 
 import com.example.drunkenmoviebackend.domain.Movie;
+import com.example.drunkenmoviebackend.domain.MovieScore;
 import com.example.drunkenmoviebackend.dto.movie.*;
 import com.example.drunkenmoviebackend.repository.MovieRepository;
 import com.example.drunkenmoviebackend.repository.MovieScoreRepository;
@@ -136,5 +137,62 @@ public class MovieService {
                 )
                 .build();
     }
+
+    public GetGaveMovieScoreResponse getMovieScore(Long movieCd, Integer userId) {
+
+        // 비로그인 사용자
+        if (userId == null) {
+            return GetGaveMovieScoreResponse.builder()
+                    .movieCd(movieCd)
+                    .score(null)
+                    .build();
+        }
+
+        return movieScoreRepository
+                .findByMovieCdAndUserno(movieCd, userId)
+                .map(movieScore ->
+                        GetGaveMovieScoreResponse.builder()
+                                .movieCd(movieCd)
+                                .score(Double.valueOf(movieScore.getScore()))
+                                .build()
+                )
+                .orElse(
+                        GetGaveMovieScoreResponse.builder()
+                                .movieCd(movieCd)
+                                .score(null)
+                                .build()
+                );
+    }
+
+    public GetMovieAverageScoreResponse getMovieAverageScore(Long movieCd, Integer userId) {
+
+        long scoreCount = movieScoreRepository.countByMovieCd(movieCd);
+
+        Double averageScore = movieScoreRepository
+                .calculateAverageScoreByMovieCd(movieCd);
+
+        // 평균 소수점 1자리 처리
+        Double roundedAverageScore =
+                averageScore == null
+                        ? 0.0
+                        : Math.round(averageScore * 10) / 10.0;
+
+        // 로그인 사용자라면 내가 준 점수도 포함
+        Float myScore = null;
+        if (userId != null) {
+            myScore = movieScoreRepository
+                    .findByMovieCdAndUserno(movieCd, userId)
+                    .map(MovieScore::getScore)
+                    .orElse(null);
+        }
+
+        return GetMovieAverageScoreResponse.builder()
+                .movieCd(movieCd)
+                .averageScore(roundedAverageScore)
+                .scoreCount(scoreCount)
+                .myScore(Double.valueOf(myScore))
+                .build();
+    }
+
 
 }

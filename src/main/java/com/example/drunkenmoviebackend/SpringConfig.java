@@ -1,6 +1,7 @@
 package com.example.drunkenmoviebackend;
 
 import com.example.drunkenmoviebackend.aop.TimeTraceAop;
+import com.example.drunkenmoviebackend.global.filter.JwtAuthenticationFilter;
 import com.example.drunkenmoviebackend.global.provider.JwtProvider;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -10,9 +11,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.time.Duration;
 
@@ -24,31 +27,24 @@ public class SpringConfig {
     private EntityManager em;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtProvider jwtProvider
+    ) throws Exception {
+
         http
-                // CSRF 비활성화 (REST API)
                 .csrf(csrf -> csrf.disable())
-
-                // 인증 정책
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/members/login",
-                                "/members/new",
-                                "/members/oauth-login",
-                                "/members/validate-email",
-                                "/members/validate-nickname",
-                                "/movie/**"
-
-
-                        ).permitAll()
-                        .anyRequest().authenticated()
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                // 기본 로그인 폼 비활성화
-                .formLogin(form -> form.disable())
-
-                // http basic 비활성화
-                .httpBasic(basic -> basic.disable());
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtProvider),
+                        UsernamePasswordAuthenticationFilter.class
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().authenticated()
+                );
 
         return http.build();
     }

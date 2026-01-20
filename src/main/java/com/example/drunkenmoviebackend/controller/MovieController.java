@@ -1,10 +1,8 @@
 package com.example.drunkenmoviebackend.controller;
 
-import com.example.drunkenmoviebackend.dto.movie.MovieDetailResponse;
-import com.example.drunkenmoviebackend.dto.movie.MovieDto;
-import com.example.drunkenmoviebackend.dto.movie.MovieListResponse;
-import com.example.drunkenmoviebackend.dto.movie.UpdateMovieScoreResponse;
+import com.example.drunkenmoviebackend.dto.movie.*;
 import com.example.drunkenmoviebackend.service.MovieService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,5 +39,18 @@ public class MovieController {
     @PostMapping("/score/{movieCd}")
     public UpdateMovieScoreResponse updateMovieScore(@PathVariable Integer movieCd) {
         return movieService.updateMovieScore(movieCd);
+    }
+
+    @GetMapping("/score/{movieCd}")
+    public GetGaveMovieScoreResponse getMovieScore(@PathVariable Long movieCd, @AuthenticationPrincipal Integer userId) {
+        return movieService.getMovieScore(movieCd, userId);
+    }
+
+    @GetMapping("/score/average/{movieCd}")
+    public GetMovieAverageScoreResponse getMovieAverageScore(
+            @PathVariable Long movieCd,
+            @AuthenticationPrincipal Integer userId
+    ) {
+        return movieService.getMovieAverageScore(movieCd, userId);
     }
 }
