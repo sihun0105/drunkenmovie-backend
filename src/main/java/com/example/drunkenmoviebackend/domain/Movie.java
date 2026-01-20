@@ -55,4 +55,5 @@ public class Movie {
     // 🔥 평점 목록
     @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
     private List<MovieScore> movieScores = new ArrayList<>();
+
 }

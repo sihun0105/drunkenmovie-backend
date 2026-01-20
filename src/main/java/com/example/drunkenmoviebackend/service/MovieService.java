@@ -3,6 +3,7 @@ package com.example.drunkenmoviebackend.service;
 import com.example.drunkenmoviebackend.domain.Movie;
 import com.example.drunkenmoviebackend.dto.movie.*;
 import com.example.drunkenmoviebackend.repository.MovieRepository;
+import com.example.drunkenmoviebackend.repository.MovieScoreRepository;
 import com.example.drunkenmoviebackend.repository.MovieVodRepository;
 import com.example.drunkenmoviebackend.repository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ReplyRepository replyRepository;
     private final MovieVodRepository movieVodRepository;
+    private final MovieScoreRepository movieScoreRepository;
 
     public List<MovieDto> getMovieDatas() {
         LocalDateTime now = LocalDateTime.now();
@@ -112,6 +114,26 @@ public class MovieService {
                                 : Math.round(row.averageScore() * 10) / 10.0
                 )
                 .vods(vods)
+                .build();
+    }
+
+    public UpdateMovieScoreResponse updateMovieScore(Integer movieCd) {
+
+        long scoreCount = movieScoreRepository.countByMovieCd(movieCd);
+        Double averageScore = movieScoreRepository.calculateAverageScoreByMovieCd(movieCd);
+
+        movieScoreRepository.updateMovieScoreStatistics(
+                movieCd,
+                scoreCount,
+                averageScore == null ? 0.0 : Math.round(averageScore * 10) / 10.0
+        );
+
+        return UpdateMovieScoreResponse.builder()
+                .movieCd(Long.valueOf(movieCd))
+                .score((double) scoreCount)
+                .averageScore(
+                        averageScore == null ? 0.0 : Math.round(averageScore * 10) / 10.0
+                )
                 .build();
     }
 
